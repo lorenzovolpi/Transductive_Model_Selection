@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12.8"
 dependencies = [
     "cap-ml @ git+https://github.com/lorenzovolpi/cap-ml.git",
-    "pandatex",
+    "pandatex @ git+https://github.com/lorenzovolpi/pandatex.git",
 ]
 
 [tool.setuptools.package-dir]
@@ -17,9 +17,6 @@ where = ["src"]
 
 [tool.ruff]
 line-length = 120
-
-[tool.uv.sources]
-pandatex = { git = "https://github.com/lorenzovolpi/pandatex.git" }
 
 [build-system]
 requires = ["setuptools>=61"]
