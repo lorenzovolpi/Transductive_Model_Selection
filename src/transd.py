@@ -117,7 +117,7 @@ def exp_protocol(
             results.append(EXP.EXISTS(clsf, dataset_name, acc_name, method_name))
             continue
 
-        df_len = D.test_prot().total()
+        df_len = D.test_prot.total()
         test_shift = get_shift(np.array([Ui.prevalence() for Ui in D.test_prot()]), D.L_prevalence).tolist()
 
         # df_len = len(true_accs[acc_name])
