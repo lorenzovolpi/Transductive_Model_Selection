@@ -9,7 +9,6 @@ import pandas as pd
 import quapy as qp
 from cap.models.cont_table import LEAP
 from cap.utils.commons import get_shift, parallel, true_acc
-from env import PROJECT
 from quapy.data import LabelledCollection
 from sklearn.base import BaseEstimator
 
@@ -23,6 +22,7 @@ from config import (
     get_acc_names,
     get_CAP_method_names,
 )
+from env import PROJECT
 from util import (
     all_exist_pre_check,
     fit_or_switch,
