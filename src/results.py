@@ -6,9 +6,10 @@ from glob import glob
 from pathlib import Path
 from typing import Any, Iterable, Literal
 
-import env
 import numpy as np
 import pandas as pd
+
+import env
 from config import (
     get_acc_names,
     get_CAP_method_names,
@@ -52,9 +53,7 @@ class Results(ABC):
         acc_names = self.df["acc_name"].unique()
 
         new_res = []
-        for m, d, cls_name, acc in IT.product(
-            methods, datasets, classifiers, acc_names
-        ):
+        for m, d, cls_name, acc in IT.product(methods, datasets, classifiers, acc_names):
             _df = self.df.loc[
                 (self.df["method"] == m)
                 & (self.df["dataset"] == d)
@@ -65,20 +64,12 @@ class Results(ABC):
             _df["filter_index"] = np.arange(len(_df))
 
             _shifts = _df.loc[:, "shifts"].to_numpy()
-            _filter_idx = np.nonzero(_shifts >= filter if high else _shifts <= filter)[
-                0
-            ]
-            new_res.append(
-                _df.loc[_df["filter_index"].isin(_filter_idx), :].drop(
-                    columns=["filter_index"]
-                )
-            )
+            _filter_idx = np.nonzero(_shifts >= filter if high else _shifts <= filter)[0]
+            new_res.append(_df.loc[_df["filter_index"].isin(_filter_idx), :].drop(columns=["filter_index"]))
 
         return Results(pd.concat(new_res))
 
-    def split_by_shift(
-        self, prevs: float | list[float] = 0.5, high_to_low=True, return_last=False
-    ) -> "Results":
+    def split_by_shift(self, prevs: float | list[float] = 0.5, high_to_low=True, return_last=False) -> "Results":
         """
         Splits a pandas.DataFrame of results based on the shift values. prevs is used to determine by what portions
         to split the pandas.DataFrame.
@@ -99,9 +90,7 @@ class Results(ABC):
         if np.isclose(np.sum(prevs), 1):
             prevs = prevs[:-1]
         elif np.sum(prevs) > 1:
-            raise ValueError(
-                "Invalid prevs array: it should sum up to 1 or leave the last prevalence implicit."
-            )
+            raise ValueError("Invalid prevs array: it should sum up to 1 or leave the last prevalence implicit.")
 
         new_ress = [[] for _ in prevs]
         if return_last:
@@ -111,9 +100,7 @@ class Results(ABC):
         datasets = self.df["dataset"].unique()
         classifiers = self.df["classifier"].unique()
         acc_names = self.df["acc_name"].unique()
-        for m, d, cls_name, acc in IT.product(
-            methods, datasets, classifiers, acc_names
-        ):
+        for m, d, cls_name, acc in IT.product(methods, datasets, classifiers, acc_names):
             _df = self.df.loc[
                 (self.df["method"] == m)
                 & (self.df["dataset"] == d)
@@ -124,32 +111,20 @@ class Results(ABC):
             _df["filter_index"] = np.arange(len(_df))
 
             _shifts = _df.loc[:, "shifts"].to_numpy()
-            _sh_sort_idx = (
-                np.argsort(_shifts)[::-1] if high_to_low else np.argsort(_shifts)
-            )
+            _sh_sort_idx = np.argsort(_shifts)[::-1] if high_to_low else np.argsort(_shifts)
             _cum_prevs = np.cumsum(prevs)
             _ths = [int(_cp * len(_df)) for _cp in _cum_prevs]
-            _filter_idxs = [_sh_sort_idx[: _ths[0]]] + [
-                _sh_sort_idx[_thl:_thr] for _thl, _thr in zip(_ths, _ths[1:])
-            ]
+            _filter_idxs = [_sh_sort_idx[: _ths[0]]] + [_sh_sort_idx[_thl:_thr] for _thl, _thr in zip(_ths, _ths[1:])]
             if return_last:
                 _filter_idxs += [_sh_sort_idx[_ths[-1] :]]
             for new_r, _fidx in zip(new_ress, _filter_idxs):
-                new_r.append(
-                    _df.loc[_df["filter_index"].isin(_fidx), :].drop(
-                        columns=["filter_index"]
-                    )
-                )
+                new_r.append(_df.loc[_df["filter_index"].isin(_fidx), :].drop(columns=["filter_index"]))
 
         return (
-            [Results(pd.concat(new_r)) for new_r in new_ress]
-            if len(new_ress) > 1
-            else Results(pd.concat(new_ress[0]))
+            [Results(pd.concat(new_r)) for new_r in new_ress] if len(new_ress) > 1 else Results(pd.concat(new_ress[0]))
         )
 
-    def CAP_model_selection(
-        self, method: str, classifier_class=None, ea_label="estim_accs"
-    ) -> "Results":
+    def CAP_model_selection(self, method: str, classifier_class=None, ea_label="estim_accs") -> "Results":
         # methods = get_CAP_method_names()
         accs = get_acc_names()
 
@@ -158,9 +133,7 @@ class Results(ABC):
         for acc_name in accs:
             # filter by method and acc and make a copy
             if classifier_class is None:
-                mdf = self.df.loc[
-                    (self.df["method"] == method) & (self.df["acc_name"] == acc_name), :
-                ].copy()
+                mdf = self.df.loc[(self.df["method"] == method) & (self.df["acc_name"] == acc_name), :].copy()
             else:
                 mdf = self.df.loc[
                     (self.df["method"] == method)
@@ -188,11 +161,7 @@ class Results(ABC):
 
         dfs = []
         for acc in accs:
-            odf = (
-                self.df.loc[self.df["acc_name"] == acc, :]
-                .groupby(["dataset", "uids", "classifier"])
-                .first()
-            )
+            odf = self.df.loc[self.df["acc_name"] == acc, :].groupby(["dataset", "uids", "classifier"]).first()
             best_idx = odf.groupby(["uids", "dataset"])["true_accs"].idxmax()
             odf = odf.loc[best_idx, :].reset_index(drop=False)
             odf["method"] = ["oracle"] * len(odf)
@@ -208,8 +177,7 @@ class Results(ABC):
         for acc, classifier in IT.product(accs, classifiers):
             ndf = (
                 self.df.loc[
-                    (self.df["acc_name"] == acc)
-                    & (self.df["classifier"] == classifier),
+                    (self.df["acc_name"] == acc) & (self.df["classifier"] == classifier),
                     :,
                 ]
                 .groupby(["dataset", "uids"])
@@ -223,9 +191,7 @@ class Results(ABC):
 
         return Results(pd.concat(dfs, axis=0))
 
-    def model_selection(
-        self, oracle=False, only_default=False, ea_label="estim_accs"
-    ) -> "Results":
+    def model_selection(self, oracle=False, only_default=False, ea_label="estim_accs") -> "Results":
         classifier_classes = get_classifier_class_names()
         spread_methods = ["Naive"]
         methods = get_CAP_method_names()
@@ -233,9 +199,7 @@ class Results(ABC):
         dfs = (
             [self.no_model_selection(only_default=only_default)]
             + [
-                self.CAP_model_selection(
-                    method=m, classifier_class=cls_class, ea_label=ea_label
-                )
+                self.CAP_model_selection(method=m, classifier_class=cls_class, ea_label=ea_label)
                 for m, cls_class in IT.product(spread_methods, classifier_classes)
             ]
             + [self.CAP_model_selection(method=m, ea_label=ea_label) for m in methods]
@@ -289,9 +253,7 @@ class Results(ABC):
         """
         return Results(self.df.loc[:, cols])
 
-    def add_column(
-        self, col_name: str, values: Any | list[Any] | np.ndarray
-    ) -> "Results":
+    def add_column(self, col_name: str, values: Any | list[Any] | np.ndarray) -> "Results":
         """
         Adds a new column to the Results.
 
@@ -331,3 +293,12 @@ class Results(ABC):
         new_df = self.df.copy()
         new_df[col] = new_df[col].apply(func)
         return Results(new_df)
+
+    def unique_column_values(self, col: str) -> Iterable[Any]:
+        """
+        Returns the unique values of a specified column.
+
+        :param col: The column to get values from.
+        :return: An iterable of unique values in the specified column.
+        """
+        return self.df[col].unique()
