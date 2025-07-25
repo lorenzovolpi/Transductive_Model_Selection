@@ -115,7 +115,7 @@ def all_exist_pre_check(dataset_name, cls_name, method_names, acc_names, experim
     return all_exist
 
 
-def decorate_dataset(df, dataset: str):
+def decorate_dataset(dataset: str):
     return r"\textsf{" + dataset + r"}"
 
 
