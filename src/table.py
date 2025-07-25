@@ -2,13 +2,13 @@ import os
 from argparse import ArgumentParser
 from typing import Literal
 
-import env
 import pandas as pd
+from pandatex import Format, Table
+
+import env
 from config import get_acc_names, get_all_dataset_names
 from results import Results
-from util import decorate_datasets, rename_datasets, rename_methods
-
-from pandatex import Format, Table
+from util import decorate_dataset, decorate_datasets, rename_datasets, rename_methods
 
 method_map = {
     "LR": "$\\varnothing$-LR",
@@ -67,19 +67,17 @@ def tables(experiment: Literal["transd", "hoptim"]):
             simple_stat=True,
         )
         for dataset in datasets:
-            _df = (
-                Results.load(
-                    base_dir=base_dir, acc_name=acc, dataset=dataset, set_problem=False
-                )
+            res = (
+                Results.load(base_dir=base_dir, acc_name=acc, dataset=dataset, set_problem=False)
                 # .split_by_shift(prevs=0.5)
                 .model_selection(oracle=False, only_default=True, ea_label=ea_label)
-                .df
+                .map_column_values("method", method_map)
+                .map_column_values("dataset", dataset_map)
+                .apply_to_column("dataset", decorate_dataset)
             )
-            methods = _df["method"].unique().tolist()
-            _df, _dataset = rename_datasets(dataset_map, _df, dataset)
-            _df, _dataset = decorate_datasets(_df, _dataset)
-            _df, _methods = rename_methods(method_map, _df, methods)
-            tbl = add_to_table(tbl, _df, _dataset, _methods)
+            _methods = [method_map.get(m, m) for m in res.unique_column_values("method")]
+            _dataset = decorate_dataset(dataset_map.get(dataset, dataset))
+            tbl = add_to_table(tbl, res.df, _dataset, _methods)
             print(f"{dataset} done")
 
         tbls.append(tbl)
