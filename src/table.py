@@ -8,20 +8,20 @@ from pandatex import Format, Table
 import env
 from config import get_acc_names, get_all_dataset_names
 from results import Results
-from util import decorate_dataset, decorate_datasets, rename_datasets, rename_methods
+from util import decorate_dataset
 
 method_map = {
-    "LR": "$\\varnothing$-LR",
-    "kNN": "$\\varnothing$-$k$NN",
-    "SVM": "$\\varnothing$-SVM",
-    "MLP": "$\\varnothing$-MLP",
-    "SVM-t": "$\\varnothing$-TSVM",
-    "Naive-LR": "IMS-LR",
-    "Naive-kNN": "IMS-$k$NN",
-    "Naive-SVM": "IMS-SVM",
-    "Naive-MLP": "IMS-MLP",
-    "Naive": "IMS-$\\forall$",
-    "O-LEAP(KDEy)": "LEAP-$\\forall$",
+    "LR": "\\nomslr",
+    "kNN": "\\nomsknn",
+    "SVM": "\\nomssvm",
+    "MLP": "\\nomsmlp",
+    "SVM-t": "\\nomstsvm",
+    "Naive-LR": "\\imslr",
+    "Naive-kNN": "\\imsknn",
+    "Naive-SVM": "\\imssvm",
+    "Naive-MLP": "\\imsmlp",
+    "Naive": "\\imsall",
+    "O-LEAP(KDEy)": "\\tmsall",
 }
 
 dataset_map = {
@@ -87,10 +87,17 @@ def tables(experiment: Literal["transd", "hoptim"]):
     os.makedirs(table_dir, exist_ok=True)
     pdf_path = os.path.join(table_dir, f"{experiment}.pdf")
     new_commands = [
-        "\\newcommand{\\leapacc}{LEAP$_\\mathrm{ACC}$}",
-        "\\newcommand{\\leapplus}{LEAP$_\\mathrm{KDEy}$}",
-        "\\newcommand{\\leapppskde}{S-LEAP$_\\mathrm{KDEy}$}",
-        "\\newcommand{\\oleapkde}{O-LEAP$_\\mathrm{KDEy}$}",
+        "\\newcommand{\\tmsall}{TMS-$\\forall$}",
+        "\\newcommand{\\imsall}{IMS-$\\forall$}",
+        "\\newcommand{\\imslr}{IMS-LR}",
+        "\\newcommand{\\imsknn}{IMS-$k$NN}",
+        "\\newcommand{\\imssvm}{IMS-SVM}",
+        "\\newcommand{\\imsmlp}{IMS-MLP}",
+        "\\newcommand{\\nomslr}{$\\emptyset$-LR}",
+        "\\newcommand{\\nomsknn}{$\\emptyset$-$k$NN}",
+        "\\newcommand{\\nomssvm}{$\\emptyset$-SVM}",
+        "\\newcommand{\\nomstsvm}{$\\emptyset$-TSVM}",
+        "\\newcommand{\\nomsmlp}{$\\emptyset$-MLP}",
     ]
     column_alignment = [5, 5, 1], "c"
     additional_headers = [("$\\varnothing$", 5), ("IMS", 5), ("TMS", 1)]
