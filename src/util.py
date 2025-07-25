@@ -115,47 +115,8 @@ def all_exist_pre_check(dataset_name, cls_name, method_names, acc_names, experim
     return all_exist
 
 
-def rename_datasets(mapping, df, datasets: str | list[str]):
-    if isinstance(datasets, str):
-        _datasets = [mapping.get(d, d) for d in [datasets]]
-    else:
-        _datasets = [mapping.get(d, d) for d in datasets]
-    for d, rd in mapping.items():
-        df.loc[df["dataset"] == d, "dataset"] = rd
-
-    if isinstance(datasets, str):
-        return df, _datasets[0]
-    else:
-        return df, _datasets
-
-
-def rename_methods(mapping, df, methods, baselines=None):
-    _methods = [mapping.get(m, m) for m in methods]
-    for m, rm in mapping.items():
-        df.loc[df["method"] == m, "method"] = rm
-
-    if baselines is None:
-        return df, _methods
-    else:
-        _baselines = [mapping.get(b, b) for b in baselines]
-        return df, _methods, _baselines
-
-
-def decorate_datasets(df, datasets: str | list[str]):
-    def _decorate(d):
-        return r"\textsf{" + d + r"}"
-
-    if isinstance(datasets, str):
-        _datasets = [_decorate(d) for d in [datasets]]
-    else:
-        _datasets = [_decorate(d) for d in datasets]
-    for d in df["dataset"].unique():
-        df.loc[df["dataset"] == d, "dataset"] = _decorate(d)
-
-    if isinstance(datasets, str):
-        return df, _datasets[0]
-    else:
-        return df, _datasets
+def decorate_dataset(df, dataset: str):
+    return r"\textsf{" + dataset + r"}"
 
 
 def one_hot(y: np.ndarray, n_classes: int | None = None):
