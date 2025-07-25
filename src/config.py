@@ -184,7 +184,7 @@ def gen_classifiers(n_classes) -> Iterable[ClsVariant]:
         class_name="SVM-t",
         h=SVMlight(kernel="rbf"),
         params={},
-        ms_ignore=True,
+        ms_ignore=False,
     )
 
 
