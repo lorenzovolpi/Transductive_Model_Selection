@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.python-version
+
+# Virtual environments
+.venv
+
+# svm_light
+svm_light
+
+# tools
+# tools
+*.sh
+*.lock
+*.json
+
+output
+tests
+old_src
+# src/hoptim.py
+
