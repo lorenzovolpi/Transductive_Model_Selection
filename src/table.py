@@ -87,8 +87,8 @@ def tables(experiment: Literal["transd", "hoptim"]):
     os.makedirs(table_dir, exist_ok=True)
     pdf_path = os.path.join(table_dir, f"{experiment}.pdf")
     new_commands = [
-        "\\newcommand{\\tmsall}{TMS-$\\forall$}",
-        "\\newcommand{\\imsall}{IMS-$\\forall$}",
+        "\newcommand{\tmsall}{TMS-All}",
+        "\newcommand{\imsall}{IMS-All}",
         "\\newcommand{\\imslr}{IMS-LR}",
         "\\newcommand{\\imsknn}{IMS-$k$NN}",
         "\\newcommand{\\imssvm}{IMS-SVM}",
@@ -100,7 +100,7 @@ def tables(experiment: Literal["transd", "hoptim"]):
         "\\newcommand{\\nomsmlp}{$\\emptyset$-MLP}",
     ]
     column_alignment = [5, 5, 1], "c"
-    additional_headers = [("$\\varnothing$", 5), ("IMS", 5), ("TMS", 1)]
+    additional_headers = [("$\\emptyset$", 5), ("IMS", 5), ("TMS", 1)]
     Table.LatexPDF(
         pdf_path,
         tables=tbls,

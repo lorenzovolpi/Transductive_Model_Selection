@@ -2,27 +2,27 @@ import os
 from argparse import ArgumentParser
 from typing import Literal
 
-import env
 import matplotlib.pyplot as plt
 import seaborn as sns
+from cap.plot.utils import get_binned_values, save_figure
+
+import env
 from config import get_acc_names, get_all_dataset_names
 from results import Results
 from util import decorate_dataset
 
-from cap.plot.utils import get_binned_values, save_figure
-
 method_map = {
-    "LR": "$\\varnothing$-LR",
-    "kNN": "$\\varnothing$-$k$NN",
-    "SVM": "$\\varnothing$-SVM",
-    "MLP": "$\\varnothing$-MLP",
-    "SVM-t": "$\\varnothing$-TSVM",
+    "LR": "$\\emptyset$-LR",
+    "kNN": "$\\emptyset$-$k$NN",
+    "SVM": "$\\emptyset$-SVM",
+    "MLP": "$\\emptyset$-MLP",
+    "SVM-t": "$\\emptyset$-TSVM",
     "Naive-LR": "IMS-LR",
     "Naive-kNN": "IMS-$k$NN",
     "Naive-SVM": "IMS-SVM",
     "Naive-MLP": "IMS-MLP",
-    "Naive": "IMS-$\\forall$",
-    "O-LEAP(KDEy)": "LEAP-$\\forall$",
+    "Naive": "IMS-All",
+    "O-LEAP(KDEy)": "TMS-All",
     "oracle": "Oracle",
 }
 
@@ -47,10 +47,7 @@ def get_palette():
     # palette = sns.color_palette()
     # return palette[:5] + palette[9:]
     _palette = sns.color_palette("Paired")
-    return {
-        method_map.get(n, n): (_palette[id] if isinstance(id, int) else id)
-        for n, id in color_map.items()
-    }
+    return {method_map.get(n, n): (_palette[id] if isinstance(id, int) else id) for n, id in color_map.items()}
 
 
 def plots(experiment: Literal["transd", "hoptim"]):
@@ -84,9 +81,7 @@ def plots(experiment: Literal["transd", "hoptim"]):
         res = []
         for dataset in datasets:
             res.append(
-                Results.load(
-                    base_dir=base_dir, acc_name=acc, dataset=dataset, set_problem=False
-                )
+                Results.load(base_dir=base_dir, acc_name=acc, dataset=dataset, set_problem=False)
                 # .split_by_shift(prevs=0.5)
                 .model_selection(oracle=True, only_default=True, ea_label=ea_label)
                 .filter_column_values("method", "isin", methods)
@@ -119,6 +114,7 @@ def plots(experiment: Literal["transd", "hoptim"]):
             palette=get_palette(),
         )
 
+        oracle_label = method_map.get("oracle", "oracle")
         oracle_df = (
             res.filter_column_values("method", "eq", "Oracle")
             .select_columns(["shift_bins", "true_accs"])
@@ -132,14 +128,24 @@ def plots(experiment: Literal["transd", "hoptim"]):
             color="black",
             linestyle="--",
             linewidth=1,
+            label=oracle_label,
         )
 
+        # Add oracle to the legend at the top
+        handles, labels = plt.gca().get_legend_handles_labels()
+        oracle_index = labels.index(oracle_label)
+        handles = [handles[oracle_index]] + handles[:oracle_index] + handles[oracle_index + 1 :]
+        labels = [labels[oracle_index]] + labels[:oracle_index] + labels[oracle_index + 1 :]
+        plt.legend(handles=handles, labels=labels)
+
+        # Set plot axis ratio
+        plt.gca().set_aspect(0.6)
+
+        # Set axes labels
         plot.set_xlabel("Amount of PPS")
-        plot.set_ylabel("True Accuracy")
+        plot.set_ylabel("Accuracy")
 
-        sns.move_legend(
-            plot, "center left", bbox_to_anchor=(1.05, 0.5), title=None, frameon=False
-        )
+        sns.move_legend(plot, "center left", bbox_to_anchor=(1.05, 0.5), title=None, frameon=False)
 
         save_figure(plot, plot_dir, f"shift_{experiment}")
 
