@@ -226,10 +226,8 @@ def gen_datasets(
 
 def gen_acc_measure():
     multiclass = env.PROBLEM == "multiclass"
-    if _toggle["vanilla"]:
-        yield "vanilla_accuracy", vanilla_acc
-    if _toggle["f1"]:
-        yield "macro-F1", f1_macro if multiclass else f1
+    yield "vanilla_accuracy", vanilla_acc
+    yield ("macro-F1", f1_macro) if multiclass else ("F1", f1)
 
 
 def gen_CAP_cont_table(h, acc_fn):
