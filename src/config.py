@@ -6,7 +6,7 @@ from typing import Iterable
 import numpy as np
 import quapy as qp
 from cap.data.datasets import fetch_UCIBinaryDataset, fetch_UCIMulticlassDataset
-from cap.error import f1, f1_macro, vanilla_acc
+from cap.error import balanced_acc, f1, f1_macro, vanilla_acc
 from cap.models.cont_table import LEAP, O_LEAP, NaiveCAP
 from cap.models.utils import OracleQuantifier
 from cap.utils.commons import contingency_table
@@ -24,11 +24,6 @@ from sklearn.svm import SVC
 import env
 from svmlight import SVMlight
 from util import sort_datasets_by_size, split_validation
-
-_toggle = {
-    "vanilla": True,
-    "f1": False,
-}
 
 
 @dataclass
@@ -227,7 +222,8 @@ def gen_datasets(
 def gen_acc_measure():
     multiclass = env.PROBLEM == "multiclass"
     yield "vanilla_accuracy", vanilla_acc
-    yield ("macro-F1", f1_macro) if multiclass else ("F1", f1)
+    # yield "macro-F1", f1_macro if multiclass else f1
+    # yield "balanced_accuracy", balanced_acc
 
 
 def gen_CAP_cont_table(h, acc_fn):
